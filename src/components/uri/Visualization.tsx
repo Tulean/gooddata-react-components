@@ -1,7 +1,7 @@
 // (C) 2007-2020 GoodData Corporation
 import { IConvertedAFM } from "@gooddata/gooddata-js/lib/DataLayer/converters/toAfmResultSpec";
 import * as React from "react";
-import {
+import sdk, {
     SDK,
     factory as createSdk,
     DataLayer,
@@ -667,11 +667,26 @@ export const IntlVisualization = injectIntl(VisualizationWrapped);
  * [Visualization](http://sdk.gooddata.com/gooddata-ui/docs/react_components.html#visualization)
  * is a component that renders saved visualization based on projectId and either identifier or uri
  */
-export class Visualization extends React.PureComponent<IVisualizationProps> {
+export class Visualization extends React.PureComponent<IVisualizationProps, { locale: "en-US" }> {
+    constructor(props: IVisualizationProps) {
+        super(props);
+
+        this.state = {
+            locale: "en-US",
+        };
+    }
+
+    public async componentDidMount() {
+        this.setState({ locale: (await sdk.user.getCurrentProfile()).language });
+    }
+
     public render() {
         return (
-            <IntlWrapper locale={this.props.locale}>
-                <IntlVisualization {...this.props} />
+            <IntlWrapper locale={this.props.locale ? this.props.locale : this.state.locale}>
+                <IntlVisualization
+                    {...this.props}
+                    locale={this.props.locale ? this.props.locale : this.state.locale}
+                />
             </IntlWrapper>
         );
     }
